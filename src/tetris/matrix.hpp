@@ -36,24 +36,29 @@ public:
 
     constexpr Matrix2D() = default;
 
-    constexpr Matrix2D(const ContentArray& contents):
+    constexpr Matrix2D(ContentArray const& contents):
         contents_{contents}
     {}
 
     constexpr T& operator[](Position pos)
     {
-        auto constants = rotation_constants(pos.rotation);
-
-        auto array_position = static_cast<std::size_t>(
-            constants.top_left +
-            constants.row_multiplier * pos.column +
-            constants.column_multiplier * pos.column
-        );
-
         return contents_[
-            array_position
+            index_of(pos)
         ];
     }
+
+    constexpr T const& operator[](Position pos) const
+    {
+        return contents_[
+            index_of(pos)
+        ];
+    }
+
+    constexpr ContentArray const& contents() const
+    {
+        return contents_;
+    }
+
 
 private:
     constexpr static RotationConstants rotation_constants(MatrixRotation rotation) {
@@ -89,6 +94,17 @@ private:
         }
 
         UTIL_MARK_UNREACHABLE;
+    }
+
+    constexpr auto index_of(Position pos) const
+    {
+        auto constants = rotation_constants(pos.rotation);
+
+        return static_cast<std::size_t>(
+            constants.top_left +
+            constants.row_multiplier * pos.column +
+            constants.column_multiplier * pos.column
+        );
     }
 
     ContentArray contents_;
