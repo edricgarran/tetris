@@ -20,12 +20,15 @@ target_sources(
 
 target_include_directories(
     cursespp
-        INTERFACE
+        PUBLIC
             ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_link_libraries(
     cursespp
-        PRIVATE
+        PUBLIC
+            assertpp
             ncurses
+        PRIVATE
+            project_options
 )

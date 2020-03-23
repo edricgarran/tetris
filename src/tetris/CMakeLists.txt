@@ -12,5 +12,6 @@ target_link_libraries(
     tetris
         PRIVATE
             project_options
+            assertpp
             cursespp
 )
