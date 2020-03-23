@@ -3,8 +3,9 @@ add_executable(tetris)
 target_sources(
     tetris
         PRIVATE
-            matrix.hpp
             main.cpp
+            matrix.hpp
+            tetriminoes.hpp
             unreachable.hpp
 )
 
