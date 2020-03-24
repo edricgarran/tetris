@@ -3,6 +3,7 @@
 
 #include <array>
 
+#include "block_type.hpp"
 #include "matrix.hpp"
 
 namespace tetris{
@@ -15,84 +16,90 @@ public:
     // Build a tetrimino representation with its shape.
     // Args:
     //     shape: A 4x4 boolean matrix representing the shape of the piece.
-    constexpr Tetrimino(Shape shape):
-        shape_{shape}
+    constexpr Tetrimino(Shape shape, BlockType type):
+        shape_{shape},
+        type_{type}
     {}
 
     const Shape& shape() const {
         return shape_;
     }
 
+    BlockType type() const
+    {
+        return type_;
+    }
+
 private:
     Shape shape_;
+    BlockType type_;
 };
 
 // Tetriminoes "assets".
 constexpr auto tetriminoes = std::array<Tetrimino, 7>{
-    // I
     Tetrimino{
         {{
             0, 0, 1, 0,
             0, 0, 1, 0,
             0, 0, 1, 0,
             0, 0, 1, 0,
-        }}
+        }},
+        BlockType::I,
     },
-    // Z
     {
         {{
             0, 0, 1, 0,
             0, 1, 1, 0,
             0, 1, 0, 0,
             0, 0, 0, 0,
-        }}
+        }},
+        BlockType::Z,
     },
-    // S
     {
         {{
             0, 1, 0, 0,
             0, 1, 1, 0,
             0, 0, 1, 0,
             0, 0, 0, 0,
-        }}
+        }},
+        BlockType::S,
     },
-    // O
     {
         {{
             0, 0, 0, 0,
             0, 1, 1, 0,
             0, 1, 1, 0,
             0, 0, 0, 0,
-        }}
+        }},
+        BlockType::O,
     },
-    // T
     {
         {{
             0, 0, 1, 0,
             0, 1, 1, 0,
             0, 0, 1, 0,
             0, 0, 0, 0,
-        }}
+        }},
+        BlockType::T,
     },
-    // J
     {
         {{
             0, 0, 1, 0,
             0, 0, 1, 0,
             0, 1, 1, 0,
             0, 0, 0, 0,
-        }}
+        }},
+        BlockType::J,
     },
-    // L
     {
         {{
             0, 1, 0, 0,
             0, 1, 0, 0,
             0, 1, 1, 0,
             0, 0, 0, 0,
-        }}
+        }},
+        BlockType::L,
     },
-
 };
 
 }

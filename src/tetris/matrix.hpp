@@ -74,6 +74,11 @@ public:
         return contents_;
     }
 
+    void fill(const T& value)
+    {
+        contents_.fill(value);
+    }
+
 private:
     struct RotationConstants {
         int top_left, row_multiplier, column_multiplier;
