@@ -73,6 +73,13 @@ void draw_tetrimino(cursespp::Window& window,
 }
 
 
+geom::Rotation next(geom::Rotation rot)
+{
+    return static_cast<geom::Rotation>(
+        (static_cast<int>(rot) + 1) % 4
+    );
+}
+
 int main()
 try {
     auto board = tetris::Board{};
@@ -107,28 +114,48 @@ try {
         auto ch = main_win.wgetch();
 
         switch(ch) {
-            case 'q':
+            case 'q': {
                 return 0;
+            }
         }
 
-        auto movement = [&]() -> std::optional<geom::Position> {
+        auto maybe_new_rotation = [&]() -> std::optional<geom::Rotation> {
             switch(ch) {
-                case KEY_DOWN:
-                    return geom::Position{1, 0};
-                case KEY_LEFT:
-                    return geom::Position{0, -1};
-                case KEY_RIGHT:
-                    return geom::Position{0, 1};
-                default:
+                case KEY_UP: {
+                    return next(current_rotation);
+                }
+                default: {
                     return std::nullopt;
+                }
             }
         }();
 
-        if (movement) {
-            auto new_position = current_position + *movement;
+        auto movement = [&]() -> std::optional<geom::Position> {
+            switch(ch) {
+                case KEY_DOWN: {
+                    return geom::Position{1, 0};
+                }
+                case KEY_LEFT: {
+                    return geom::Position{0, -1};
+                }
+                case KEY_RIGHT: {
+                    return geom::Position{0, 1};
+                }
+                default: {
+                    return std::nullopt;
+                }
+            }
+        }();
 
-            if (board.piece_fits(current_tetrimino, new_position, current_rotation)) {
+        if (movement or maybe_new_rotation) {
+            auto new_position = current_position + movement.value_or(geom::Position{0, 0});
+            auto new_rotation = maybe_new_rotation.value_or(current_rotation);
+
+            if (board.piece_fits(current_tetrimino,
+                                 new_position,
+                                 new_rotation)) {
                 current_position = new_position;
+                current_rotation = new_rotation;
             }
         }
 
