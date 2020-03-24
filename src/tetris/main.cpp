@@ -1,6 +1,7 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
+#include <optional>
 
 #include "assert.hpp"
 #include "block_type.hpp"
@@ -104,27 +105,31 @@ try {
 
         // Input
         auto ch = main_win.wgetch();
+
         switch(ch) {
-            case -1:
-                // No key.
-                break;
             case 'q':
                 return 0;
-            case KEY_UP:
-            case KEY_DOWN:
-            case KEY_LEFT: {
-                auto new_position = current_position + geom::Position{0, -1};
-                if (board.piece_fits(current_tetrimino, new_position, current_rotation)) {
-                    current_position = new_position;
-                }
-                break;
+        }
+
+        auto movement = [&]() -> std::optional<geom::Position> {
+            switch(ch) {
+                case KEY_DOWN:
+                    return geom::Position{1, 0};
+                case KEY_LEFT:
+                    return geom::Position{0, -1};
+                case KEY_RIGHT:
+                    return geom::Position{0, 1};
+                default:
+                    return std::nullopt;
             }
-            case KEY_RIGHT:
-                auto new_position = current_position + geom::Position{0, 1};
-                if (board.piece_fits(current_tetrimino, new_position, current_rotation)) {
-                    current_position = new_position;
-                }
-                break;
+        }();
+
+        if (movement) {
+            auto new_position = current_position + *movement;
+
+            if (board.piece_fits(current_tetrimino, new_position, current_rotation)) {
+                current_position = new_position;
+            }
         }
 
         // Draw
