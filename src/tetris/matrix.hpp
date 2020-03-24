@@ -2,7 +2,6 @@
 #define GEOM_MATRIX_H
 
 #include <array>
-#include <cassert>
 #include <tuple>
 
 #include "unreachable.hpp"
