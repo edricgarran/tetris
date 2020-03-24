@@ -11,10 +11,7 @@ namespace tetris {
         constexpr static auto columns = 10;
 
         using Blocks = geom::Matrix2D<BlockType, rows, columns>;
-
-        struct Position {
-            int row, column;
-        };
+        using Position = geom::Position;
 
         Board():
             blocks_{}
@@ -25,7 +22,7 @@ namespace tetris {
         BlockType operator[](Position pos) const
         {
 
-            return blocks_[{pos.row, pos.column}];
+            return blocks_[{{pos.row, pos.column}}];
         }
 
         const Blocks& blocks() const

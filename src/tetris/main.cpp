@@ -3,9 +3,11 @@
 #include <thread>
 
 #include "assert.hpp"
-#include "cursespp.hpp"
 #include "block_type.hpp"
 #include "board.hpp"
+#include "cursespp.hpp"
+#include "matrix.hpp"
+#include "tetriminoes.hpp"
 
 
 // Map block types to curses characters.
@@ -32,11 +34,10 @@ cursespp::Character board_character(tetris::BlockType type)
 //                    drawing.
 void draw_board(cursespp::Window& window,
                 tetris::Board const& board,
-                int row_offset = 0,
-                int column_offset = 0)
+                geom::Position offset = {0, 0})
 {
     for (auto r = 0; r < tetris::Board::rows; ++r) {
-        window.wmove(row_offset + r + 1, column_offset + 1);
+        window.wmove(offset.row + r + 1, offset.column + 1);
 
         for (auto c = 0; c < tetris::Board::columns; ++c) {
             window.waddch(board_character(board[{r, c}]));
@@ -46,11 +47,36 @@ void draw_board(cursespp::Window& window,
 }
 
 
+void draw_tetrimino(cursespp::Window& window,
+                    tetris::Tetrimino const& tetrimino,
+                    geom::MatrixPosition pos)
+{
+    auto type = tetrimino.type();
+
+    for (auto r = 0; r < 4; ++r) {
+        auto window_row = pos.position.row + r + 1;
+        auto first_column = 2*(pos.position.column) + 1;
+
+        window.wmove(window_row, first_column);
+
+        for (auto c = 0; c < 4; ++c) {
+            auto solid = tetrimino.shape()[{{r, c}, pos.rotation}];
+
+            if (solid) {
+                window.waddch(board_character(type));
+                window.waddch(board_character(type));
+            } else if (c < 3) {
+                auto next_column = first_column + 2*(c + 1);
+
+                window.wmove(window_row, next_column);
+            }
+        }
+    }
+}
+
+
 int main()
 try {
-    constexpr int board_width = 10;
-    constexpr int board_height = 20;
-
     auto board = tetris::Board{};
 
     auto& curses = cursespp::get_curses();
@@ -64,7 +90,7 @@ try {
 
     main_win.wrefresh();
 
-    auto board_window = curses.newwin(board_height + 2, 2*board_width + 2, 0, 0);
+    auto board_window = curses.newwin(board.rows + 2, 2*board.columns + 2, 0, 0);
 
     while (true) {
         using namespace std::chrono;
@@ -75,6 +101,7 @@ try {
         board_window.add_box(0, 0);
 
         draw_board(board_window, board);
+        draw_tetrimino(board_window, tetris::tetriminoes[3], {{0, 0}, geom::Rotation::R90});
 
         board_window.wrefresh();
 
