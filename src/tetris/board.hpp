@@ -48,12 +48,15 @@ namespace tetris {
                     auto board_position = top_left + Position{row, column};
 
                     auto solid = tetrimino.shape()[{{row, column}, rotation}];
-                    auto position_empty = blocks_[{board_position}] == BlockType::Empty;
 
-                    if (solid and
-                        (not in_bounds(board_position) or
-                         not position_empty) ){
-                        return false;
+                    if (solid) {
+                        auto position_empty =
+                            blocks_[{board_position}] == BlockType::Empty;
+
+                        if (not in_bounds(board_position) or
+                            not position_empty) {
+                            return false;
+                        }
                     }
                 }
             }
