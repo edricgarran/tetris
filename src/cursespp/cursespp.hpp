@@ -24,7 +24,7 @@ namespace cursespp {
     using Character = chtype;
 
     // Error on an ncurses function call.
-    class CursesError: std::runtime_error {
+    struct CursesError: std::runtime_error {
         using std::runtime_error::runtime_error;
     };
 
