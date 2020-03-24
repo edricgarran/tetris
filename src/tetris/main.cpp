@@ -57,18 +57,15 @@ void draw_tetrimino(cursespp::Window& window,
         auto window_row = pos.position.row + r + 1;
         auto first_column = 2*(pos.position.column) + 1;
 
-        window.wmove(window_row, first_column);
-
         for (auto c = 0; c < 4; ++c) {
+            auto window_column = first_column + 2*c;
             auto solid = tetrimino.shape()[{{r, c}, pos.rotation}];
 
             if (solid) {
-                window.waddch(board_character(type));
-                window.waddch(board_character(type));
-            } else if (c < 3) {
-                auto next_column = first_column + 2*(c + 1);
+                window.wmove(window_row, window_column);
 
-                window.wmove(window_row, next_column);
+                window.waddch(board_character(type));
+                window.waddch(board_character(type));
             }
         }
     }
@@ -91,6 +88,11 @@ try {
     main_win.wrefresh();
 
     auto board_window = curses.newwin(board.rows + 2, 2*board.columns + 2, 0, 0);
+    board_window.add_box(0, 0);
+
+    auto current_tetrimino_index = std::size_t{1u};
+    auto current_position = geom::Position{0, 0};
+    auto current_rotation = geom::Rotation::R0;
 
     while (true) {
         using namespace std::chrono;
@@ -98,25 +100,53 @@ try {
 
         auto frame_start = high_resolution_clock::now();
 
-        board_window.add_box(0, 0);
+        auto const& current_tetrimino = tetris::tetriminoes[current_tetrimino_index];
 
+        // Input
+        auto ch = main_win.wgetch();
+        switch(ch) {
+            case -1:
+                // No key.
+                break;
+            case 'q':
+                return 0;
+            case KEY_UP:
+            case KEY_DOWN:
+            case KEY_LEFT: {
+                auto new_position = current_position + geom::Position{0, -1};
+                if (board.piece_fits(current_tetrimino, new_position, current_rotation)) {
+                    current_position = new_position;
+                }
+                break;
+            }
+            case KEY_RIGHT:
+                auto new_position = current_position + geom::Position{0, 1};
+                if (board.piece_fits(current_tetrimino, new_position, current_rotation)) {
+                    current_position = new_position;
+                }
+                break;
+        }
+
+        // Draw
         draw_board(board_window, board);
-        draw_tetrimino(board_window, tetris::tetriminoes[3], {{0, 0}, geom::Rotation::R90});
+        draw_tetrimino(board_window, current_tetrimino, {current_position, current_rotation});
 
         board_window.wrefresh();
 
-        if (auto ch = main_win.wgetch(); ch == 'q') {
-            break;
-        }
-
+        // Sleep for the remainder of the frame.
         auto done = high_resolution_clock::now();
         auto remaining_time = (frame_start + 16666us) - done;
         std::this_thread::sleep_for(remaining_time);
     }
-} catch (assertpp::AssertionError& e){
+} catch (assertpp::AssertionError const& e){
     if constexpr (assertpp::assertions_enabled) {
         std::clog << e.what() << '\n';
     }
+    return 1;
+} catch (cursespp::CursesError const& e) {
+    std::clog << e.what() << '\n';
+    return 1;
 } catch (...) {
     std::clog << "Aborted with unknown error.";
+    return 1;
 }

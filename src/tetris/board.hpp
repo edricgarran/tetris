@@ -3,6 +3,7 @@
 
 #include "block_type.hpp"
 #include "matrix.hpp"
+#include "tetriminoes.hpp"
 
 namespace tetris {
     class Board {
@@ -28,6 +29,36 @@ namespace tetris {
         const Blocks& blocks() const
         {
             return blocks_;
+        }
+
+        bool in_bounds(Position pos)
+        {
+            return
+                (pos.row >= 0 and pos.row < rows) and
+                (pos.column >= 0 and pos.column < columns)
+            ;
+        }
+
+        bool piece_fits(Tetrimino const& tetrimino,
+                        Position top_left,
+                        geom::Rotation rotation)
+        {
+            for (auto row = 0; row < 4; ++row) {
+                for (auto column = 0; column < 4; ++column) {
+                    auto board_position = top_left + Position{row, column};
+
+                    auto solid = tetrimino.shape()[{{row, column}, rotation}];
+                    auto position_empty = blocks_[{board_position}] == BlockType::Empty;
+
+                    if (solid and
+                        (not in_bounds(board_position) or
+                         not position_empty) ){
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
 
     private:
