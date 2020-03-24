@@ -4,7 +4,9 @@ target_sources(
     tetris
         PRIVATE
             main.cpp
+            matrix.cpp
             matrix.hpp
+            tetriminoes.cpp
             tetriminoes.hpp
             unreachable.hpp
 )
