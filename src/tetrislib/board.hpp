@@ -26,12 +26,18 @@ namespace tetris {
             return blocks_[{{pos.row, pos.column}}];
         }
 
+        BlockType& operator[](Position pos)
+        {
+
+            return blocks_[{{pos.row, pos.column}}];
+        }
+
         const Blocks& blocks() const
         {
             return blocks_;
         }
 
-        bool in_bounds(Position pos)
+        bool in_bounds(Position pos) const
         {
             return
                 (pos.row >= 0 and pos.row < rows) and
@@ -41,7 +47,7 @@ namespace tetris {
 
         bool piece_fits(Tetrimino const& tetrimino,
                         Position top_left,
-                        geom::Rotation rotation)
+                        geom::Rotation rotation) const
         {
             for (auto row = 0; row < 4; ++row) {
                 for (auto column = 0; column < 4; ++column) {

@@ -1,4 +1,5 @@
 add_library(ncurses INTERFACE)
+
 target_link_libraries(
     ncurses
         INTERFACE

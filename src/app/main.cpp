@@ -2,6 +2,8 @@
 #include <iostream>
 #include <thread>
 #include <optional>
+#include <random>
+#include <variant>
 
 #include "assert.hpp"
 #include "block_type.hpp"
@@ -9,6 +11,7 @@
 #include "cursespp.hpp"
 #include "matrix.hpp"
 #include "tetriminoes.hpp"
+#include "tetris.hpp"
 
 
 // Map block types to curses characters.
@@ -48,19 +51,20 @@ void draw_board(cursespp::Window& window,
 }
 
 
+
 void draw_tetrimino(cursespp::Window& window,
-                    tetris::Tetrimino const& tetrimino,
-                    geom::MatrixPosition pos)
+                    tetris::FallingTetrimino const& falling)
 {
+    auto& tetrimino = falling.tetrimino.get();
     auto type = tetrimino.type();
 
     for (auto r = 0; r < 4; ++r) {
-        auto window_row = pos.position.row + r + 1;
-        auto first_column = 2*(pos.position.column) + 1;
+        auto window_row = falling.position.row + r + 1;
+        auto first_column = 2*(falling.position.column) + 1;
 
         for (auto c = 0; c < 4; ++c) {
             auto window_column = first_column + 2*c;
-            auto solid = tetrimino.shape()[{{r, c}, pos.rotation}];
+            auto solid = tetrimino.shape()[{{r, c}, falling.rotation}];
 
             if (solid) {
                 window.wmove(window_row, window_column);
@@ -73,17 +77,8 @@ void draw_tetrimino(cursespp::Window& window,
 }
 
 
-geom::Rotation next(geom::Rotation rot)
-{
-    return static_cast<geom::Rotation>(
-        (static_cast<int>(rot) + 1) % 4
-    );
-}
-
 int main()
 try {
-    auto board = tetris::Board{};
-
     auto& curses = cursespp::get_curses();
     auto& main_win = curses.get_stdscr();
 
@@ -95,20 +90,18 @@ try {
 
     main_win.wrefresh();
 
-    auto board_window = curses.newwin(board.rows + 2, 2*board.columns + 2, 0, 0);
+    auto rd = std::random_device{};
+    auto engine = std::default_random_engine{rd()};
+    auto game = tetris::Tetris{std::move(engine)};
+
+    auto board_window = curses.newwin(game.board().rows + 2, 2*game.board().columns + 2, 0, 0);
     board_window.add_box(0, 0);
 
-    auto current_tetrimino_index = std::size_t{1u};
-    auto current_position = geom::Position{0, 0};
-    auto current_rotation = geom::Rotation::R0;
-
-    while (true) {
+    while (not game.is_over()) {
         using namespace std::chrono;
         using namespace std::chrono_literals;
 
         auto frame_start = high_resolution_clock::now();
-
-        auto const& current_tetrimino = tetris::tetriminoes[current_tetrimino_index];
 
         // Input
         auto ch = main_win.wgetch();
@@ -119,49 +112,33 @@ try {
             }
         }
 
-        auto maybe_new_rotation = [&]() -> std::optional<geom::Rotation> {
+        auto input = [&]()
+        {
             switch(ch) {
                 case KEY_UP: {
-                    return next(current_rotation);
+                    return tetris::Input::Rotate;
                 }
-                default: {
-                    return std::nullopt;
-                }
-            }
-        }();
-
-        auto movement = [&]() -> std::optional<geom::Position> {
-            switch(ch) {
                 case KEY_DOWN: {
-                    return geom::Position{1, 0};
+                    return tetris::Input::Down;
                 }
                 case KEY_LEFT: {
-                    return geom::Position{0, -1};
+                    return tetris::Input::Left;
                 }
                 case KEY_RIGHT: {
-                    return geom::Position{0, 1};
+                    return tetris::Input::Right;
                 }
                 default: {
-                    return std::nullopt;
+                    return tetris::Input::Nothing;
                 }
             }
         }();
 
-        if (movement or maybe_new_rotation) {
-            auto new_position = current_position + movement.value_or(geom::Position{0, 0});
-            auto new_rotation = maybe_new_rotation.value_or(current_rotation);
-
-            if (board.piece_fits(current_tetrimino,
-                                 new_position,
-                                 new_rotation)) {
-                current_position = new_position;
-                current_rotation = new_rotation;
-            }
-        }
+        // Tick
+        game.advance(input);
 
         // Draw
-        draw_board(board_window, board);
-        draw_tetrimino(board_window, current_tetrimino, {current_position, current_rotation});
+        draw_board(board_window, game.board());
+        draw_tetrimino(board_window, game.falling_tetrimino());
 
         board_window.wrefresh();
 

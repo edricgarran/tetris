@@ -1,3 +1,5 @@
 add_subdirectory(assertpp)
 add_subdirectory(cursespp)
-add_subdirectory(tetris)
+add_subdirectory(geom)
+add_subdirectory(tetrislib)
+add_subdirectory(app)
