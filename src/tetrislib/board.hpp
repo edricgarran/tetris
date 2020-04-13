@@ -6,73 +6,73 @@
 #include "tetriminoes.hpp"
 
 namespace tetris {
-    class Board {
-    public:
-        constexpr static auto rows = 20;
-        constexpr static auto columns = 10;
+class Board {
+public:
+    constexpr static auto rows = 20;
+    constexpr static auto columns = 10;
 
-        using Blocks = geom::Matrix2D<BlockType, rows, columns>;
-        using Position = geom::Position;
+    using Blocks = geom::Matrix2D<BlockType, rows, columns>;
+    using Position = geom::Position;
 
-        Board():
-            blocks_{}
-        {
-            blocks_.fill(BlockType::Empty);
-        }
+    Board():
+        blocks_{}
+    {
+        blocks_.fill(BlockType::Empty);
+    }
 
-        BlockType operator[](Position pos) const
-        {
+    BlockType operator[](Position pos) const
+    {
 
-            return blocks_[{{pos.row, pos.column}}];
-        }
+        return blocks_[{{pos.row, pos.column}}];
+    }
 
-        BlockType& operator[](Position pos)
-        {
+    BlockType& operator[](Position pos)
+    {
 
-            return blocks_[{{pos.row, pos.column}}];
-        }
+        return blocks_[{{pos.row, pos.column}}];
+    }
 
-        const Blocks& blocks() const
-        {
-            return blocks_;
-        }
+    const Blocks& blocks() const
+    {
+        return blocks_;
+    }
 
-        bool in_bounds(Position pos) const
-        {
-            return
-                (pos.row >= 0 and pos.row < rows) and
-                (pos.column >= 0 and pos.column < columns)
-            ;
-        }
+    bool in_bounds(Position pos) const
+    {
+        return
+            (pos.row >= 0 and pos.row < rows) and
+            (pos.column >= 0 and pos.column < columns)
+        ;
+    }
 
-        bool piece_fits(Tetrimino const& tetrimino,
-                        Position top_left,
-                        geom::Rotation rotation) const
-        {
-            for (auto row = 0; row < 4; ++row) {
-                for (auto column = 0; column < 4; ++column) {
-                    auto board_position = top_left + Position{row, column};
+    bool piece_fits(Tetrimino const& tetrimino,
+                    Position top_left,
+                    geom::Rotation rotation) const
+    {
+        for (auto row = 0; row < 4; ++row) {
+            for (auto column = 0; column < 4; ++column) {
+                auto board_position = top_left + Position{row, column};
 
-                    auto solid = tetrimino.shape()[{{row, column}, rotation}];
+                auto solid = tetrimino.shape()[{{row, column}, rotation}];
 
-                    if (solid) {
-                        auto position_empty =
-                            blocks_[{board_position}] == BlockType::Empty;
+                if (solid) {
+                    auto position_empty =
+                        blocks_[{board_position}] == BlockType::Empty;
 
-                        if (not in_bounds(board_position) or
-                            not position_empty) {
-                            return false;
-                        }
+                    if (not in_bounds(board_position) or
+                        not position_empty) {
+                        return false;
                     }
                 }
             }
-
-            return true;
         }
 
-    private:
-        Blocks blocks_;
-    };
+        return true;
+    }
+
+private:
+    Blocks blocks_;
+};
 }
 
 #endif

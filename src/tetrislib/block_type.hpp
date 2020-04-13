@@ -3,17 +3,17 @@
 
 namespace tetris {
 
-    enum class BlockType {
-        Empty,
-        I,
-        O,
-        S,
-        Z,
-        L,
-        J,
-        T,
-        Line,
-    };
+enum class BlockType {
+    Empty,
+    I,
+    O,
+    S,
+    Z,
+    L,
+    J,
+    T,
+    Line,
+};
 
 }
 
