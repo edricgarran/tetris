@@ -3,8 +3,8 @@
 
 #include <stdexcept>
 
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
 
 // Exception-based assertions, so that they can be caught on main to ensure
 // destructors run properly.
@@ -19,7 +19,7 @@ constexpr auto assertions_enabled =
 #else
     false
 #endif
-;
+    ;
 
 // Signals a failed assertion.
 struct AssertionError: std::runtime_error {
@@ -34,8 +34,7 @@ struct AssertionError: std::runtime_error {
 template <typename Predicate>
 void assert_predicate(
     [[maybe_unused]] Predicate predicate,
-    [[maybe_unused]] const char* message
-)
+    [[maybe_unused]] const char* message)
 {
     if constexpr (assertions_enabled) {
         if (not predicate()) {

@@ -1,8 +1,8 @@
 #include <chrono>
 #include <iostream>
-#include <thread>
 #include <optional>
 #include <random>
+#include <thread>
 #include <variant>
 
 #include "assert.hpp"
@@ -13,7 +13,6 @@
 #include "tetriminoes.hpp"
 #include "tetris.hpp"
 
-
 // Map block types to curses characters.
 //
 // Args:
@@ -23,10 +22,8 @@
 cursespp::Character board_character(tetris::BlockType type)
 {
     return static_cast<cursespp::Character>(
-        " IOSZLJT="[static_cast<std::size_t>(type)]
-    );
+        " IOSZLJT="[static_cast<std::size_t>(type)]);
 }
-
 
 // "Draw" a tetris board.
 // Args:
@@ -36,9 +33,10 @@ cursespp::Character board_character(tetris::BlockType type)
 //                 drawing.
 //     column_offset: How many columns from the top-left corner to skip before
 //                    drawing.
-void draw_board(cursespp::Window& window,
-                tetris::Board const& board,
-                geom::Position offset = {0, 0})
+void draw_board(
+    cursespp::Window& window,
+    tetris::Board const& board,
+    geom::Position offset = {0, 0})
 {
     for (auto r = 0; r < tetris::Board::rows; ++r) {
         window.wmove(offset.row + r + 1, offset.column + 1);
@@ -50,20 +48,19 @@ void draw_board(cursespp::Window& window,
     }
 }
 
-
-
-void draw_tetrimino(cursespp::Window& window,
-                    tetris::FallingTetrimino const& falling)
+void draw_tetrimino(
+    cursespp::Window& window,
+    tetris::FallingTetrimino const& falling)
 {
     auto& tetrimino = falling.tetrimino.get();
     auto type = tetrimino.type();
 
     for (auto r = 0; r < 4; ++r) {
         auto window_row = falling.position.row + r + 1;
-        auto first_column = 2*(falling.position.column) + 1;
+        auto first_column = 2 * (falling.position.column) + 1;
 
         for (auto c = 0; c < 4; ++c) {
-            auto window_column = first_column + 2*c;
+            auto window_column = first_column + 2 * c;
             auto solid = tetrimino.shape()[{{r, c}, falling.rotation}];
 
             if (solid) {
@@ -75,7 +72,6 @@ void draw_tetrimino(cursespp::Window& window,
         }
     }
 }
-
 
 int main()
 try {
@@ -94,7 +90,11 @@ try {
     auto engine = std::default_random_engine{rd()};
     auto game = tetris::Tetris{std::move(engine)};
 
-    auto board_window = curses.newwin(game.board().rows + 2, 2*game.board().columns + 2, 0, 0);
+    auto board_window = curses.newwin(
+        game.board().rows + 2,
+        2 * game.board().columns + 2,
+        0,
+        0);
     board_window.add_box(0, 0);
 
     while (not game.is_over()) {
@@ -106,7 +106,7 @@ try {
         // Input
         auto ch = main_win.wgetch();
 
-        switch(ch) {
+        switch (ch) {
             case 'q': {
                 return 0;
             }
@@ -114,7 +114,7 @@ try {
 
         auto input = [&]()
         {
-            switch(ch) {
+            switch (ch) {
                 case KEY_UP: {
                     return tetris::Input::Rotate;
                 }
@@ -147,7 +147,7 @@ try {
         auto remaining_time = (frame_start + 16666us) - done;
         std::this_thread::sleep_for(remaining_time);
     }
-} catch (assertpp::AssertionError const& e){
+} catch (assertpp::AssertionError const& e) {
     if constexpr (assertpp::assertions_enabled) {
         std::clog << e.what() << '\n';
     }

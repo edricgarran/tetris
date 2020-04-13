@@ -18,7 +18,8 @@ enum class Rotation {
 struct Position {
     int row, column;
 
-    Position& operator+=(Position const& other) {
+    Position& operator+=(Position const& other)
+    {
         row += other.row;
         column += other.column;
         return *this;
@@ -29,21 +30,20 @@ struct Position {
 // position.
 struct MatrixPosition {
     constexpr MatrixPosition(Position p, Rotation r = Rotation::R0):
-        position{p},
-        rotation{r}
+        position{p}, rotation{r}
     {}
 
     Position position;
     Rotation rotation;
 };
 
-inline Position operator+(Position rhs, Position const& lhs) {
+inline Position operator+(Position rhs, Position const& lhs)
+{
     return rhs += lhs;
 }
 
 // Fixed, compile-time-sized matrix implementation.
-template <typename T, int Rows, int Columns>
-class Matrix2D {
+template <typename T, int Rows, int Columns> class Matrix2D {
 private:
     constexpr static auto unsigned_size =
         static_cast<std::size_t>(Rows * Columns);
@@ -58,9 +58,7 @@ public:
     constexpr Matrix2D() = default;
 
     // Construct a matrix with a 1D array with its contents.
-    constexpr Matrix2D(ContentArray const& contents):
-        contents_{contents}
-    {}
+    constexpr Matrix2D(ContentArray const& contents): contents_{contents} {}
 
     // Access a matrix element.
     //
@@ -114,8 +112,9 @@ private:
     //
     // Therefore by rotating the matrix the top-left corner (first 1D index)
     // changes, as well as how the index changes when the 2D indices move.
-    constexpr static RotationConstants rotation_constants(Rotation rotation) {
-        switch(rotation) {
+    constexpr static RotationConstants rotation_constants(Rotation rotation)
+    {
+        switch (rotation) {
             case Rotation::R0: {
                 return {
                     0,
@@ -156,10 +155,8 @@ private:
         auto constants = rotation_constants(pos.rotation);
 
         return static_cast<std::size_t>(
-            constants.top_left +
-            constants.row_multiplier * pos.position.row +
-            constants.column_multiplier * pos.position.column
-        );
+            constants.top_left + constants.row_multiplier * pos.position.row +
+            constants.column_multiplier * pos.position.column);
     }
 
     ContentArray contents_;

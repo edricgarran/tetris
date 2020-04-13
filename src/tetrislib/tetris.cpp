@@ -4,14 +4,11 @@
 
 #include "containers.hpp"
 
-
 namespace {
 
 geom::Rotation next(geom::Rotation rot)
 {
-    return static_cast<geom::Rotation>(
-        (static_cast<int>(rot) + 1) % 4
-    );
+    return static_cast<geom::Rotation>((static_cast<int>(rot) + 1) % 4);
 }
 
 }
@@ -20,8 +17,9 @@ namespace tetris {
 
 void Tetris::apply_input(Input input)
 {
-    auto maybe_new_rotation = [&]() -> std::optional<geom::Rotation> {
-        switch(input) {
+    auto maybe_new_rotation = [&]() -> std::optional<geom::Rotation>
+    {
+        switch (input) {
             case Input::Rotate: {
                 return next(state.falling.rotation);
             }
@@ -31,8 +29,9 @@ void Tetris::apply_input(Input input)
         }
     }();
 
-    auto maybe_movement = [&]() -> std::optional<geom::Position> {
-        switch(input) {
+    auto maybe_movement = [&]() -> std::optional<geom::Position>
+    {
+        switch (input) {
             case Input::Down: {
                 return geom::Position{1, 0};
             }
@@ -49,12 +48,14 @@ void Tetris::apply_input(Input input)
     }();
 
     if (maybe_movement or maybe_new_rotation) {
-        auto new_position = state.falling.position + maybe_movement.value_or(geom::Position{0, 0});
+        auto new_position = state.falling.position +
+                            maybe_movement.value_or(geom::Position{0, 0});
         auto new_rotation = maybe_new_rotation.value_or(state.falling.rotation);
 
-        if (board_.piece_fits(state.falling.tetrimino,
-                             new_position,
-                             new_rotation)) {
+        if (board_.piece_fits(
+                state.falling.tetrimino,
+                new_position,
+                new_rotation)) {
             state.falling.position = new_position;
             state.falling.rotation = new_rotation;
         }
@@ -63,16 +64,20 @@ void Tetris::apply_input(Input input)
 
 void Tetris::check_for_game_over()
 {
-    state.game_over = not board_.piece_fits(state.falling.tetrimino,
-                                            state.falling.position,
-                                            state.falling.rotation);
+    state.game_over = not board_.piece_fits(
+        state.falling.tetrimino,
+        state.falling.position,
+        state.falling.rotation);
 }
 
 bool Tetris::try_drop()
 {
     auto down = state.falling.position + geom::Position{1, 0};
 
-    if (not board_.piece_fits(state.falling.tetrimino, down, state.falling.rotation)) {
+    if (not board_.piece_fits(
+            state.falling.tetrimino,
+            down,
+            state.falling.rotation)) {
         return false;
     }
 
@@ -92,7 +97,8 @@ void Tetris::lock_tetrimino()
     for (auto r = 0; r < 4; ++r) {
         for (auto c = 0; c < 4; ++c) {
             if (tetrimino.shape()[{{r, c}, state.falling.rotation}]) {
-                board_[state.falling.position + geom::Position{r, c}] = tetrimino.type();
+                board_[state.falling.position + geom::Position{r, c}] =
+                    tetrimino.type();
             }
         }
     }
@@ -112,7 +118,6 @@ void Tetris::mark_cleared_lines()
             }
 
             return true;
-
         }();
 
         if (full) {
@@ -130,7 +135,6 @@ void Tetris::mark_cleared_lines()
         state.clearing_ticks = state.ticks_to_fall;
     }
 }
-
 
 void Tetris::clear_lines()
 {
@@ -154,7 +158,7 @@ void Tetris::clear_lines()
 State Tetris::game_tick(Input input)
 {
     if (state.clearing_ticks > 0) {
-         --state.clearing_ticks;
+        --state.clearing_ticks;
         return State::Clearing;
     }
 

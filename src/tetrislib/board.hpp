@@ -14,8 +14,7 @@ public:
     using Blocks = geom::Matrix2D<BlockType, rows, columns>;
     using Position = geom::Position;
 
-    Board():
-        blocks_{}
+    Board(): blocks_{}
     {
         blocks_.fill(BlockType::Empty);
     }
@@ -39,15 +38,14 @@ public:
 
     bool in_bounds(Position pos) const
     {
-        return
-            (pos.row >= 0 and pos.row < rows) and
-            (pos.column >= 0 and pos.column < columns)
-        ;
+        return (pos.row >= 0 and pos.row < rows) and
+               (pos.column >= 0 and pos.column < columns);
     }
 
-    bool piece_fits(Tetrimino const& tetrimino,
-                    Position top_left,
-                    geom::Rotation rotation) const
+    bool piece_fits(
+        Tetrimino const& tetrimino,
+        Position top_left,
+        geom::Rotation rotation) const
     {
         for (auto row = 0; row < 4; ++row) {
             for (auto column = 0; column < 4; ++column) {
@@ -59,8 +57,7 @@ public:
                     auto position_empty =
                         blocks_[{board_position}] == BlockType::Empty;
 
-                    if (not in_bounds(board_position) or
-                        not position_empty) {
+                    if (not in_bounds(board_position) or not position_empty) {
                         return false;
                     }
                 }

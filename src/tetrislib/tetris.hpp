@@ -8,14 +8,11 @@
 #include "board.hpp"
 #include "unreachable.hpp"
 
-
 namespace tetris {
 
 class Rng {
 public:
-    Rng(std::default_random_engine engine):
-        engine_{std::move(engine)}
-    {}
+    Rng(std::default_random_engine engine): engine_{std::move(engine)} {}
 
     int get_int()
     {
@@ -27,22 +24,16 @@ private:
     std::uniform_int_distribution<int> distribution{0, 6};
 };
 
-
 struct FallingTetrimino {
-    FallingTetrimino(Tetrimino const& t):
-        tetrimino{t}
-    {}
+    FallingTetrimino(Tetrimino const& t): tetrimino{t} {}
 
     std::reference_wrapper<Tetrimino const> tetrimino;
     geom::Position position{0, 0};
     geom::Rotation rotation{geom::Rotation::R0};
 };
 
-
 struct GameState {
-    GameState(FallingTetrimino t):
-        falling(std::move(t))
-    {}
+    GameState(FallingTetrimino t): falling(std::move(t)) {}
 
     FallingTetrimino falling;
     int clearing_ticks = 0;
@@ -52,7 +43,6 @@ struct GameState {
     std::vector<int> cleared_lines;
 };
 
-
 enum class Input {
     Left,
     Right,
@@ -61,12 +51,10 @@ enum class Input {
     Nothing,
 };
 
-
 inline Tetrimino const& random_tetrimino(Rng& rng)
 {
     return tetriminoes[static_cast<std::size_t>(rng.get_int())];
 }
-
 
 enum class State {
     Default,
@@ -74,13 +62,9 @@ enum class State {
     Clearing,
 };
 
-
 class Tetris {
 public:
-    Tetris(Rng rng):
-        rng_(std::move(rng)),
-        state{{random_tetrimino(rng_)}}
-    {}
+    Tetris(Rng rng): rng_(std::move(rng)), state{{random_tetrimino(rng_)}} {}
 
     bool is_over() const
     {
@@ -101,7 +85,8 @@ public:
     {
         if (not state.game_over) {
             auto reset = game_tick(input);
-            state.ticks = [&](){
+            state.ticks = [&]()
+            {
                 switch (reset) {
                     case State::Default: {
                         return state.ticks + 1;
@@ -114,7 +99,7 @@ public:
                     }
                 }
 
-               UTIL_MARK_UNREACHABLE;
+                UTIL_MARK_UNREACHABLE;
             }();
         }
     }
@@ -135,6 +120,5 @@ private:
 };
 
 }
-
 
 #endif

@@ -57,10 +57,7 @@ public:
     Window(Window const&) = delete;
     Window& operator=(Window const&) = delete;
 
-    Window(Window&& other):
-        window_{other.release_window()}
-    {
-    }
+    Window(Window&& other): window_{other.release_window()} {}
 
     Window& operator=(Window&& other)
     {
@@ -84,17 +81,12 @@ public:
 
     void wmove(int row, int column)
     {
-        detail::check_error(
-            ::wmove(window_, row, column), "wmove call failed"
-        );
+        detail::check_error(::wmove(window_, row, column), "wmove call failed");
     }
 
     void waddch(Character ch)
     {
-        detail::check_error(
-            ::waddch(window_, ch),
-            "waddch call failed"
-        );
+        detail::check_error(::waddch(window_, ch), "waddch call failed");
     }
 
     int wgetch()
@@ -104,18 +96,12 @@ public:
 
     void wrefresh()
     {
-        detail::check_error(
-            ::wrefresh(window_),
-            "wrefresh call failed"
-        );
+        detail::check_error(::wrefresh(window_), "wrefresh call failed");
     }
 
     void keypad(bool enable)
     {
-        detail::check_error(
-            ::keypad(window_, enable),
-            "keypad call failed"
-        );
+        detail::check_error(::keypad(window_, enable), "keypad call failed");
     }
 
     // Forward `wtimeout` (may be a macro).
@@ -132,16 +118,13 @@ public:
     }
 
 private:
-    Window(WINDOW* window):
-        window_{window}
-    {}
+    Window(WINDOW* window): window_{window} {}
 
     WINDOW* release_window()
     {
         assertpp::assert_predicate(
             [&] { return window_ != stdscr; },
-            "stdscr's Window shouldn't be released/moved."
-        );
+            "stdscr's Window shouldn't be released/moved.");
 
         auto released = window_;
         window_ = nullptr;
