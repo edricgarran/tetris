@@ -1,3 +1,4 @@
+add_subdirectory(util)
 add_subdirectory(assertpp)
 add_subdirectory(cursespp)
 add_subdirectory(geom)

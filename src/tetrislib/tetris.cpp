@@ -1,5 +1,10 @@
 #include "tetris.hpp"
 
+#include <vector>
+
+#include "containers.hpp"
+
+
 namespace {
 
 geom::Rotation next(geom::Rotation rot)
@@ -93,24 +98,86 @@ void Tetris::lock_tetrimino()
     }
 }
 
-bool Tetris::game_tick(Input input)
+void Tetris::mark_cleared_lines()
 {
+    for (auto r = 0; r < 4; ++r) {
+        auto row = r + state.falling.position.row;
+
+        auto full = [&]()
+        {
+            for (auto c = 0; c < board_.columns; ++c) {
+                if (board_[{row, c}] == BlockType::Empty) {
+                    return false;
+                }
+            }
+
+            return true;
+
+        }();
+
+        if (full) {
+            state.cleared_lines.push_back(row);
+        }
+    }
+
+    if (not state.cleared_lines.empty()) {
+        for (auto row: state.cleared_lines) {
+            for (auto c = 0; c < board_.columns; ++c) {
+                board_[{row, c}] = BlockType::Line;
+            }
+        }
+
+        state.clearing_ticks = state.ticks_to_fall;
+    }
+}
+
+
+void Tetris::clear_lines()
+{
+    auto writing_row = board_.rows - 1;
+
+    for (auto row = writing_row; row >= 0; --row) {
+        if (util::contains(state.cleared_lines, row)) {
+            continue;
+        }
+
+        for (auto c = 0; c < board_.columns; ++c) {
+            board_[{writing_row, c}] = board_[{row, c}];
+        }
+
+        --writing_row;
+    }
+
+    state.cleared_lines.clear();
+}
+
+State Tetris::game_tick(Input input)
+{
+    if (state.clearing_ticks > 0) {
+         --state.clearing_ticks;
+        return State::Clearing;
+    }
+
+    if (not state.cleared_lines.empty()) {
+        clear_lines();
+    }
+
     apply_input(input);
 
     if (state.ticks < state.ticks_to_fall) {
-        return false;
+        return State::Default;
     }
 
     if (try_drop()) {
-        return true;
+        return State::Dropped;
     }
 
     lock_tetrimino();
-    // TODO: Clear lines.
+    mark_cleared_lines();
     pick_new_tetrimino();
     check_for_game_over();
 
-    return true;
+    return State::Dropped;
 }
 
 }

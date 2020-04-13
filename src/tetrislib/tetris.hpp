@@ -3,7 +3,10 @@
 
 #include <functional>
 #include <random>
+#include <vector>
+
 #include "board.hpp"
+#include "unreachable.hpp"
 
 
 namespace tetris {
@@ -42,9 +45,11 @@ struct GameState {
     {}
 
     FallingTetrimino falling;
+    int clearing_ticks = 0;
     int ticks_to_fall = 20;
     int ticks = 1;
     bool game_over = false;
+    std::vector<int> cleared_lines;
 };
 
 
@@ -61,6 +66,13 @@ inline Tetrimino const& random_tetrimino(Rng& rng)
 {
     return tetriminoes[static_cast<std::size_t>(rng.get_int())];
 }
+
+
+enum class State {
+    Default,
+    Dropped,
+    Clearing,
+};
 
 
 class Tetris {
@@ -89,7 +101,21 @@ public:
     {
         if (not state.game_over) {
             auto reset = game_tick(input);
-            state.ticks = reset ? 0 : state.ticks + 1;
+            state.ticks = [&](){
+                switch (reset) {
+                    case State::Default: {
+                        return state.ticks + 1;
+                    }
+                    case State::Clearing: {
+                        return state.ticks;
+                    }
+                    case State::Dropped: {
+                        return 0;
+                    }
+                }
+
+               UTIL_MARK_UNREACHABLE;
+            }();
         }
     }
 
@@ -99,7 +125,9 @@ private:
     bool try_drop();
     void lock_tetrimino();
     void pick_new_tetrimino();
-    bool game_tick(Input input);
+    void mark_cleared_lines();
+    void clear_lines();
+    State game_tick(Input input);
 
     Rng rng_;
     Board board_;

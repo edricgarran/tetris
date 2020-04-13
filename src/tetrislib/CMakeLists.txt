@@ -25,6 +25,7 @@ target_link_libraries(
     tetrislib
         PUBLIC
             geom
+            util
 
         PRIVATE
             project_options
